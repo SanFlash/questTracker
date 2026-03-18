@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SATYON — Developer Growth Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/*────────────────────────────────────────────────
+  RESET & TOKENS
+────────────────────────────────────────────────*/
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg0:#07070d;--bg1:#0d0d18;--bg2:#131325;--bg3:#1a1a35;--bg4:#1e1e3e;
+  --p:#7c5cfc;--p2:#a78bfa;--p3:#c4b5fd;
+  --c:#22d3ee;--gold:#f5c842;--gold2:#fde68a;
+  --g:#34d399;--r:#f87171;--o:#fb923c;
+  --txt:#e2e0f0;--txt2:#9896b8;--txt3:#4a4868;
+  --bdr:rgba(120,100,255,.15);--bdr2:rgba(120,100,255,.35);
+  --font-head:'Orbitron',sans-serif;
+  --font-body:'Exo 2',sans-serif;
+  --font-mono:'Share Tech Mono',monospace;
+}
+html,body{width:100%;min-height:100vh;background:var(--bg0);color:var(--txt);font-family:var(--font-body);overflow-x:hidden}
+input,textarea,select,button{font-family:inherit}
+
+/*────────────────────────────────────────────────
+  SHARED BG
+────────────────────────────────────────────────*/
+.bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(124,92,252,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,92,252,.04) 1px,transparent 1px);
+  background-size:56px 56px;animation:gdrift 30s linear infinite}
+@keyframes gdrift{to{background-position:56px 56px}}
+.canvas-stars{position:fixed;inset:0;pointer-events:none;z-index:0}
+
+/*────────────────────────────────────────────────
+  PAGE WRAPPER
+────────────────────────────────────────────────*/
+.page{position:relative;z-index:1;display:none;min-height:100vh}
+.page.active{display:flex;flex-direction:column}
+
+/*────────────────────────────────────────────────
+  ══ PAGE: AUTH ══
+────────────────────────────────────────────────*/
+#page-auth{align-items:center;justify-content:center;padding:24px}
+
+.auth-card{
+  width:min(440px,100%);
+  background:linear-gradient(135deg,rgba(19,19,37,.95),rgba(13,13,24,.97));
+  border:1px solid var(--bdr2);border-radius:20px;padding:40px 36px;
+  position:relative;overflow:hidden;
+}
+.auth-card::before{
+  content:'';position:absolute;top:-80px;right:-80px;
+  width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle,rgba(124,92,252,.12),transparent 70%);
+  pointer-events:none;
+}
+.auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px;justify-content:center}
+.auth-logo-orb{
+  width:48px;height:48px;border-radius:50%;
+  background:linear-gradient(135deg,var(--p),var(--c));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-head);font-size:20px;font-weight:900;color:#fff;
+  box-shadow:0 0 24px rgba(124,92,252,.55);
+}
+.auth-logo-text{font-family:var(--font-head);font-size:20px;font-weight:900;letter-spacing:4px;color:var(--p3)}
+.auth-logo-sub{font-size:10px;color:var(--txt3);letter-spacing:1.5px;margin-top:1px}
+
+.auth-tabs{display:flex;background:var(--bg2);border-radius:10px;padding:3px;margin-bottom:28px;border:1px solid var(--bdr)}
+.auth-tab{flex:1;padding:9px;text-align:center;font-size:12px;font-weight:600;letter-spacing:1px;color:var(--txt3);cursor:pointer;border-radius:8px;transition:all .2s}
+.auth-tab.on{background:var(--p);color:#fff;box-shadow:0 0 12px rgba(124,92,252,.4)}
+
+.field-wrap{margin-bottom:16px}
+.field-label{display:block;font-size:11px;color:var(--txt3);letter-spacing:.5px;margin-bottom:5px}
+.field-input{
+  width:100%;padding:11px 14px;
+  background:var(--bg2);border:1px solid var(--bdr);border-radius:9px;
+  color:var(--txt);font-size:14px;outline:none;transition:border-color .2s;
+}
+.field-input:focus{border-color:var(--p)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.auth-btn{
+  width:100%;padding:13px;margin-top:4px;
+  background:linear-gradient(135deg,var(--p),#5b3dcc);
+  border:none;border-radius:10px;
+  font-family:var(--font-head);font-size:12px;font-weight:700;letter-spacing:2px;
+  color:#fff;cursor:pointer;transition:opacity .2s,transform .15s;
+}
+.auth-btn:hover{opacity:.9;transform:scale(1.02)}
+.auth-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+.auth-err{font-size:12px;color:var(--r);margin-bottom:12px;min-height:18px;text-align:center}
+
+.avatar-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;justify-content:center}
+.avatar-opt{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;border:2px solid transparent;transition:border-color .15s,transform .15s;background:var(--bg3)}
+.avatar-opt.sel{border-color:var(--p);transform:scale(1.12);box-shadow:0 0 10px rgba(124,92,252,.4)}
+
+/*────────────────────────────────────────────────
+  ══ LOBBY / ACHIEVEMENT REVEAL ══
+────────────────────────────────────────────────*/
+#page-lobby{background:var(--bg0);align-items:center;justify-content:center;min-height:100vh;position:relative;overflow:hidden}
+
+.lobby-bg-pulse{position:absolute;inset:0;pointer-events:none}
+.lb-ring{position:absolute;border-radius:50%;border:1px solid rgba(124,92,252,.2);animation:ring-expand 3s ease-out infinite}
+.lb-ring:nth-child(1){width:300px;height:300px;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:0s}
+.lb-ring:nth-child(2){width:500px;height:500px;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:.5s}
+.lb-ring:nth-child(3){width:700px;height:700px;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:1s}
+.lb-ring:nth-child(4){width:900px;height:900px;top:50%;left:50%;transform:translate(-50%,-50%);animation-delay:1.5s}
+@keyframes ring-expand{0%{opacity:.6;transform:translate(-50%,-50%) scale(.5)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.2)}}
+
+.lobby-content{position:relative;z-index:2;text-align:center;padding:32px}
+
+.lobby-welcome{font-family:var(--font-head);font-size:11px;letter-spacing:4px;color:var(--p2);margin-bottom:16px;opacity:0;animation:fade-up .6s .3s ease forwards}
+.lobby-name{font-family:var(--font-head);font-size:clamp(28px,6vw,52px);font-weight:900;color:#fff;letter-spacing:3px;margin-bottom:8px;opacity:0;animation:fade-up .6s .6s ease forwards}
+.lobby-rank{font-size:14px;color:var(--gold);letter-spacing:2px;margin-bottom:40px;opacity:0;animation:fade-up .6s .9s ease forwards}
+@keyframes fade-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* Certificate cards that fly in */
+.cert-stage{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;margin-bottom:40px}
+.cert-card{
+  width:280px;background:linear-gradient(135deg,rgba(26,26,53,.95),rgba(13,13,24,.97));
+  border:1px solid var(--gold);border-radius:16px;padding:24px 20px;text-align:center;
+  opacity:0;transform:translateY(60px) scale(.8);
+  transition:opacity .6s ease,transform .6s cubic-bezier(.34,1.56,.64,1);
+  box-shadow:0 0 30px rgba(245,200,66,.15);
+  position:relative;overflow:hidden;cursor:pointer;
+}
+.cert-card.revealed{opacity:1;transform:translateY(0) scale(1)}
+.cert-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(245,200,66,.04),transparent);pointer-events:none}
+.cert-shine{position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(45deg,transparent 30%,rgba(255,255,255,.04) 50%,transparent 70%);animation:shine 3s ease-in-out infinite;pointer-events:none}
+@keyframes shine{0%,100%{transform:translateX(-100%) translateY(-100%)}50%{transform:translateX(0) translateY(0)}}
+.cert-icon-wrap{font-size:40px;margin-bottom:10px}
+.cert-badge-ring{
+  width:70px;height:70px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),#e8a000);
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;margin:0 auto 12px;
+  box-shadow:0 0 20px rgba(245,200,66,.4);
+  animation:badge-glow 2s ease-in-out infinite;
+}
+@keyframes badge-glow{0%,100%{box-shadow:0 0 20px rgba(245,200,66,.4)}50%{box-shadow:0 0 35px rgba(245,200,66,.7)}}
+.cert-name{font-family:var(--font-head);font-size:12px;font-weight:700;letter-spacing:2px;color:var(--gold2);margin-bottom:6px}
+.cert-skill{font-size:11px;color:var(--txt2);margin-bottom:12px}
+.cert-score{font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--gold)}
+.cert-score-label{font-size:10px;color:var(--txt3);letter-spacing:1px}
+.cert-date{font-size:10px;color:var(--txt3);margin-top:8px;font-style:italic}
+
+.lobby-enter-btn{
+  padding:14px 48px;
+  background:linear-gradient(135deg,var(--p),var(--c));
+  border:none;border-radius:12px;
+  font-family:var(--font-head);font-size:12px;font-weight:700;letter-spacing:3px;
+  color:#fff;cursor:pointer;
+  opacity:0;animation:fade-up .6s 2.4s ease forwards;
+  box-shadow:0 0 24px rgba(124,92,252,.4);
+  transition:transform .2s,box-shadow .2s;
+}
+.lobby-enter-btn:hover{transform:scale(1.05);box-shadow:0 0 36px rgba(124,92,252,.6)}
+
+/* Particle burst on lobby */
+.burst-particle{position:absolute;width:4px;height:4px;border-radius:50%;pointer-events:none;animation:burst var(--d,.8s) ease forwards var(--delay,0s)}
+@keyframes burst{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0)}}
+
+/*────────────────────────────────────────────────
+  ══ SHARED NAV ══
+────────────────────────────────────────────────*/
+.app-nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 28px;
+  background:rgba(10,10,20,.92);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--bdr);
+  position:sticky;top:0;z-index:60;
+}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-orb{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--c));display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-size:13px;font-weight:900;color:#fff;box-shadow:0 0 12px rgba(124,92,252,.4)}
+.nav-word{font-family:var(--font-head);font-size:13px;font-weight:700;letter-spacing:3px;color:var(--p3)}
+.nav-links{display:flex;gap:4px}
+.nav-link{padding:7px 14px;font-size:11px;font-weight:600;letter-spacing:1px;color:var(--txt3);cursor:pointer;border-radius:8px;transition:all .2s;border:1px solid transparent}
+.nav-link:hover{color:var(--txt2);background:rgba(124,92,252,.08)}
+.nav-link.on{color:var(--p2);background:rgba(124,92,252,.12);border-color:rgba(124,92,252,.2)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-xp{font-family:var(--font-mono);font-size:11px;color:var(--gold);background:rgba(245,200,66,.07);border:1px solid rgba(245,200,66,.2);padding:4px 10px;border-radius:16px}
+.nav-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--c));display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;border:2px solid var(--bdr2);transition:border-color .2s}
+.nav-avatar:hover{border-color:var(--p2)}
+
+/*────────────────────────────────────────────────
+  ══ PAGE: PROFILE ══
+────────────────────────────────────────────────*/
+.profile-hero{
+  background:linear-gradient(135deg,rgba(124,92,252,.12),rgba(34,211,238,.06));
+  border-bottom:1px solid var(--bdr);padding:40px 32px;
+  display:flex;align-items:flex-start;gap:28px;flex-wrap:wrap;position:relative;overflow:hidden;
+}
+.profile-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(124,92,252,.15),transparent 70%);pointer-events:none}
+.profile-avatar-wrap{position:relative;flex-shrink:0}
+.profile-avatar{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--c));display:flex;align-items:center;justify-content:center;font-size:48px;border:3px solid var(--p2);box-shadow:0 0 28px rgba(124,92,252,.4)}
+.profile-edit-avatar{position:absolute;bottom:0;right:0;width:28px;height:28px;border-radius:50%;background:var(--p);border:2px solid var(--bg0);display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:transform .15s}
+.profile-edit-avatar:hover{transform:scale(1.1)}
+.profile-hero-info{flex:1;min-width:200px}
+.profile-name{font-family:var(--font-head);font-size:24px;font-weight:700;color:#fff;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+.profile-rank-tag{font-size:10px;color:var(--gold);background:rgba(245,200,66,.1);border:1px solid rgba(245,200,66,.25);padding:2px 8px;border-radius:10px;letter-spacing:1px}
+.profile-bio{font-size:13px;color:var(--txt2);margin-bottom:12px;font-style:italic;line-height:1.5}
+.profile-tags{display:flex;gap:6px;flex-wrap:wrap}
+.ptag{font-size:10px;color:var(--p2);background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.22);padding:3px 10px;border-radius:8px}
+.profile-stats{display:flex;gap:20px;flex-wrap:wrap;padding:20px 32px;border-bottom:1px solid var(--bdr)}
+.pstat{text-align:center;min-width:80px}
+.pstat-val{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--p2)}
+.pstat-key{font-size:10px;color:var(--txt3);letter-spacing:.5px;margin-top:2px}
+
+.profile-body{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:24px 32px}
+.prof-section{background:var(--bg1);border:1px solid var(--bdr);border-radius:12px;padding:20px}
+.prof-sec-title{font-family:var(--font-head);font-size:11px;letter-spacing:2px;color:var(--txt3);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.prof-sec-title::before{content:'';width:3px;height:12px;background:var(--p);border-radius:2px}
+
+/* Edit form inside profile */
+.edit-field{margin-bottom:12px}
+.edit-label{font-size:11px;color:var(--txt3);letter-spacing:.5px;margin-bottom:4px;display:block}
+.edit-input{width:100%;padding:9px 12px;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-size:13px;outline:none;transition:border-color .2s}
+.edit-input:focus{border-color:var(--p)}
+.edit-textarea{width:100%;padding:9px 12px;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-size:13px;outline:none;resize:vertical;min-height:64px;line-height:1.5;transition:border-color .2s}
+.edit-textarea:focus{border-color:var(--p)}
+.save-btn{padding:9px 20px;background:var(--p);border:none;border-radius:8px;font-family:var(--font-head);font-size:10px;font-weight:700;letter-spacing:1.5px;color:#fff;cursor:pointer;transition:opacity .2s}
+.save-btn:hover{opacity:.85}
+
+/* Achievement badges in profile */
+.achievement-grid{display:flex;flex-wrap:wrap;gap:10px}
+.ach-badge{
+  width:64px;text-align:center;cursor:pointer;
+  transition:transform .2s;
+}
+.ach-badge:hover{transform:scale(1.1)}
+.ach-icon{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#e8a000);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 4px;box-shadow:0 0 12px rgba(245,200,66,.3)}
+.ach-icon.locked{background:var(--bg3);box-shadow:none;filter:grayscale(1);opacity:.35}
+.ach-label{font-size:9px;color:var(--txt3);letter-spacing:.3px;text-align:center}
+
+/* Quest progress in profile */
+.ongoing-quest{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(124,92,252,.08)}
+.ongoing-quest:last-child{border-bottom:none;padding-bottom:0}
+.oq-icon{width:36px;height:36px;border-radius:8px;background:rgba(124,92,252,.1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.oq-info{flex:1;min-width:0}
+.oq-title{font-size:13px;font-weight:600;color:var(--txt);margin-bottom:4px}
+.oq-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.oq-fill{height:100%;background:linear-gradient(90deg,var(--p),var(--c));border-radius:2px}
+.oq-pct{font-family:var(--font-mono);font-size:11px;color:var(--p2);flex-shrink:0}
+
+@media(max-width:700px){.profile-body{grid-template-columns:1fr}.profile-stats{gap:12px}}
+
+/*────────────────────────────────────────────────
+  ══ PAGE: LEADERBOARD ══
+────────────────────────────────────────────────*/
+.lb-header{padding:28px 32px 0;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.lb-title{font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--p3);letter-spacing:2px}
+.lb-sub{font-size:12px;color:var(--txt3);margin-top:3px}
+.lb-filter{display:flex;gap:8px;flex-wrap:wrap;margin:16px 32px;padding-bottom:16px;border-bottom:1px solid var(--bdr)}
+.lb-filter-btn{padding:6px 14px;font-size:11px;font-weight:600;letter-spacing:.8px;color:var(--txt3);background:var(--bg2);border:1px solid var(--bdr);border-radius:20px;cursor:pointer;transition:all .15s}
+.lb-filter-btn:hover{border-color:var(--p);color:var(--p2)}
+.lb-filter-btn.on{background:rgba(124,92,252,.15);border-color:var(--p);color:var(--p2)}
+
+/* Top 3 podium */
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:0;padding:24px 32px 0;overflow:hidden}
+.podium-slot{display:flex;flex-direction:column;align-items:center;gap:8px;transition:transform .3s}
+.podium-slot:hover{transform:translateY(-4px)}
+.podium-avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;border:3px solid transparent;position:relative}
+.podium-slot:nth-child(1) .podium-avatar{width:72px;height:72px;border-color:var(--gold);box-shadow:0 0 20px rgba(245,200,66,.4)}
+.podium-slot:nth-child(2) .podium-avatar{width:64px;height:64px;border-color:var(--txt2);box-shadow:0 0 14px rgba(153,150,184,.3)}
+.podium-slot:nth-child(3) .podium-avatar{width:58px;height:58px;border-color:#cd7f32;box-shadow:0 0 12px rgba(205,127,50,.3)}
+.podium-crown{position:absolute;top:-20px;font-size:20px}
+.podium-name{font-size:12px;font-weight:600;color:var(--txt);text-align:center;max-width:90px}
+.podium-score{font-family:var(--font-mono);font-size:11px;color:var(--gold);text-align:center}
+.podium-base{border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:center}
+.podium-slot:nth-child(1) .podium-base{width:100px;height:90px;background:linear-gradient(180deg,rgba(245,200,66,.15),rgba(245,200,66,.04));border:1px solid rgba(245,200,66,.2);border-bottom:none}
+.podium-slot:nth-child(2) .podium-base{width:90px;height:70px;background:linear-gradient(180deg,rgba(153,150,184,.1),rgba(153,150,184,.02));border:1px solid rgba(153,150,184,.15);border-bottom:none}
+.podium-slot:nth-child(3) .podium-base{width:80px;height:55px;background:linear-gradient(180deg,rgba(205,127,50,.1),rgba(205,127,50,.02));border:1px solid rgba(205,127,50,.15);border-bottom:none}
+.podium-rank-num{font-family:var(--font-head);font-size:24px;font-weight:900;opacity:.3}
+
+/* Full leaderboard table */
+.lb-table-wrap{padding:0 32px 80px}
+.lb-row{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 16px;border-radius:10px;
+  border:1px solid transparent;
+  transition:background .15s,border-color .15s;cursor:pointer;margin-bottom:4px;
+}
+.lb-row:hover{background:rgba(124,92,252,.05);border-color:var(--bdr)}
+.lb-row.you{background:rgba(124,92,252,.08);border-color:rgba(124,92,252,.25)}
+.lb-pos{font-family:var(--font-mono);font-size:13px;color:var(--txt3);min-width:28px;text-align:center}
+.lb-pos.g{color:var(--gold)}.lb-pos.s{color:#c0c0d0}.lb-pos.b{color:#cd7f32}
+.lb-av{width:40px;height:40px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.lb-name{flex:1;font-size:14px;font-weight:600;color:var(--txt)}
+.lb-you-tag{font-size:9px;color:var(--p);background:rgba(124,92,252,.15);padding:1px 6px;border-radius:6px;margin-left:6px;letter-spacing:.5px}
+.lb-rank-title{font-size:11px;color:var(--txt3);min-width:120px}
+.lb-certs{font-family:var(--font-mono);font-size:12px;color:var(--c);min-width:60px;text-align:right}
+.lb-score{font-family:var(--font-mono);font-size:14px;font-weight:700;color:var(--p2);min-width:70px;text-align:right}
+.lb-badge{font-size:16px}
+
+/* Quest-specific leaderboard */
+.quest-lb-select{margin:0 32px 16px;display:flex;gap:10px;flex-wrap:wrap}
+.qlb-btn{padding:8px 16px;background:var(--bg2);border:1px solid var(--bdr);border-radius:20px;font-size:11px;font-weight:600;color:var(--txt3);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.qlb-btn:hover{border-color:var(--p);color:var(--p2)}
+.qlb-btn.on{background:rgba(124,92,252,.12);border-color:var(--p);color:var(--p2)}
+
+/*────────────────────────────────────────────────
+  ══ QUIZ MODAL ══
+────────────────────────────────────────────────*/
+.quiz-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.quiz-overlay.open{opacity:1;pointer-events:all}
+.quiz-modal{
+  width:min(600px,96vw);max-height:90vh;overflow-y:auto;
+  background:linear-gradient(135deg,var(--bg2),var(--bg1));
+  border:1px solid var(--bdr2);border-radius:20px;padding:36px 32px;
+  transform:scale(.92) translateY(20px);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);position:relative;
+}
+.quiz-overlay.open .quiz-modal{transform:scale(1) translateY(0)}
+.quiz-close{position:absolute;top:18px;right:18px;background:none;border:none;color:var(--txt3);font-size:18px;cursor:pointer;border-radius:6px;padding:4px 8px}
+.quiz-close:hover{color:var(--r)}
+.quiz-stage-header{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.quiz-icon{font-size:36px}
+.quiz-title-block{}
+.quiz-title{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--p3);letter-spacing:2px}
+.quiz-subtitle{font-size:12px;color:var(--txt3);margin-top:2px}
+.quiz-progress-track{height:4px;background:var(--bg3);border-radius:2px;margin-bottom:28px;overflow:hidden}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--p),var(--c));border-radius:2px;transition:width .4s ease}
+.quiz-q-num{font-size:11px;color:var(--txt3);letter-spacing:1px;margin-bottom:8px}
+.quiz-question{font-size:17px;font-weight:500;color:var(--txt);line-height:1.5;margin-bottom:24px}
+.quiz-options{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.quiz-opt{
+  padding:13px 16px;background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;
+  cursor:pointer;font-size:14px;color:var(--txt2);transition:all .2s;text-align:left;
+  display:flex;align-items:center;gap:12px;
+}
+.quiz-opt:hover:not(.selected):not(.correct):not(.wrong){border-color:var(--p2);color:var(--txt);background:var(--bg4)}
+.quiz-opt.selected{border-color:var(--p);background:rgba(124,92,252,.15);color:var(--txt)}
+.quiz-opt.correct{border-color:var(--g);background:rgba(52,211,153,.12);color:var(--g)}
+.quiz-opt.wrong{border-color:var(--r);background:rgba(248,113,113,.1);color:var(--r)}
+.quiz-opt-letter{width:26px;height:26px;border-radius:50%;background:var(--bg2);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;font-family:var(--font-mono)}
+.quiz-next-btn{width:100%;padding:12px;background:linear-gradient(135deg,var(--p),#5b3dcc);border:none;border-radius:10px;font-family:var(--font-head);font-size:11px;font-weight:700;letter-spacing:2px;color:#fff;cursor:pointer;transition:opacity .2s;display:none}
+.quiz-next-btn.show{display:block}
+.quiz-next-btn:hover{opacity:.85}
+
+/* Quiz result */
+.quiz-result{text-align:center;padding:20px 0}
+.result-score-ring{
+  width:120px;height:120px;border-radius:50%;
+  border:4px solid var(--gold);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  margin:0 auto 20px;
+  box-shadow:0 0 30px rgba(245,200,66,.3);
+}
+.result-score-num{font-family:var(--font-head);font-size:30px;font-weight:900;color:var(--gold)}
+.result-score-label{font-size:10px;color:var(--txt3);letter-spacing:1px}
+.result-title{font-family:var(--font-head);font-size:18px;font-weight:700;color:#fff;margin-bottom:8px}
+.result-sub{font-size:13px;color:var(--txt2);margin-bottom:24px;line-height:1.6}
+.result-cert-preview{
+  background:linear-gradient(135deg,rgba(26,26,53,.9),rgba(13,13,24,.9));
+  border:1px solid var(--gold);border-radius:12px;padding:20px;margin-bottom:20px;
+  display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .2s;
+}
+.result-cert-preview:hover{border-color:var(--gold2)}
+.cert-claim-btn{width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),#b8860b);border:none;border-radius:10px;font-family:var(--font-head);font-size:11px;font-weight:700;letter-spacing:2px;color:#111;cursor:pointer;transition:opacity .2s}
+.cert-claim-btn:hover{opacity:.85}
+
+/*────────────────────────────────────────────────
+  TOAST
+────────────────────────────────────────────────*/
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg3);border:1px solid var(--bdr2);border-radius:12px;padding:12px 24px;font-family:var(--font-mono);font-size:12px;z-index:500;white-space:nowrap;transition:transform .4s cubic-bezier(.34,1.56,.64,1);text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.g{color:var(--g);box-shadow:0 0 20px rgba(52,211,153,.2)}
+.toast.gold{color:var(--gold);box-shadow:0 0 20px rgba(245,200,66,.2)}
+.toast.p{color:var(--p2);box-shadow:0 0 20px rgba(124,92,252,.2)}
+
+/*────────────────────────────────────────────────
+  MISC
+────────────────────────────────────────────────*/
+.section-pad{padding:24px 32px}
+.empty-state{text-align:center;padding:48px;color:var(--txt3);font-size:13px}
+@media(max-width:600px){.section-pad{padding:16px}.lb-rank-title{display:none}.lb-certs{display:none}.podium{gap:4px}.quiz-modal{padding:24px 16px}}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<canvas class="canvas-stars" id="stars"></canvas>
+
+<!-- ════════════════════════════════════════════
+     PAGE: AUTH
+════════════════════════════════════════════ -->
+<div class="page active" id="page-auth">
+  <div class="auth-card" style="margin:auto">
+    <div class="auth-logo">
+      <div class="auth-logo-orb">S</div>
+      <div>
+        <div class="auth-logo-text">SATYON</div>
+        <div class="auth-logo-sub">DEVELOPER GROWTH ENGINE</div>
+      </div>
+    </div>
+    <div class="auth-tabs">
+      <div class="auth-tab on" onclick="authTab('login',this)">SIGN IN</div>
+      <div class="auth-tab" onclick="authTab('signup',this)">CREATE ACCOUNT</div>
+    </div>
+
+    <!-- Login form -->
+    <div id="form-login">
+      <div class="field-wrap"><label class="field-label">Email</label><input class="field-input" id="l-email" type="email" placeholder="you@example.com"></div>
+      <div class="field-wrap"><label class="field-label">Password</label><input class="field-input" id="l-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="auth-err" id="l-err"></div>
+      <button class="auth-btn" onclick="doLogin()">ENTER THE SYSTEM</button>
+      <div style="text-align:center;margin-top:14px;font-size:11px;color:var(--txt3)">Demo: any email + password</div>
+    </div>
+
+    <!-- Signup form -->
+    <div id="form-signup" style="display:none">
+      <div class="field-row">
+        <div class="field-wrap"><label class="field-label">Username</label><input class="field-input" id="s-user" placeholder="ArjunX_Dev"></div>
+        <div class="field-wrap"><label class="field-label">Display name</label><input class="field-input" id="s-name" placeholder="Arjun"></div>
+      </div>
+      <div class="field-wrap"><label class="field-label">Email</label><input class="field-input" id="s-email" type="email" placeholder="you@example.com"></div>
+      <div class="field-row">
+        <div class="field-wrap"><label class="field-label">Password</label><input class="field-input" id="s-pass" type="password" placeholder="••••••••"></div>
+        <div class="field-wrap"><label class="field-label">Confirm</label><input class="field-input" id="s-pass2" type="password" placeholder="••••••••"></div>
+      </div>
+      <div style="font-size:11px;color:var(--txt3);letter-spacing:.5px;margin-bottom:8px">CHOOSE AVATAR</div>
+      <div class="avatar-row" id="avatar-row"></div>
+      <div class="auth-err" id="s-err"></div>
+      <button class="auth-btn" onclick="doSignup()">BEGIN YOUR JOURNEY</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE: LOBBY
+════════════════════════════════════════════ -->
+<div class="page" id="page-lobby">
+  <div class="lobby-bg-pulse">
+    <div class="lb-ring"></div><div class="lb-ring"></div>
+    <div class="lb-ring"></div><div class="lb-ring"></div>
+  </div>
+  <div class="lobby-content">
+    <div class="lobby-welcome">WELCOME BACK, HUNTER</div>
+    <div class="lobby-name" id="lobby-name">ARJUNX_DEV</div>
+    <div class="lobby-rank" id="lobby-rank">⚔ DEVELOPER · LEVEL 12</div>
+    <div class="cert-stage" id="cert-stage"></div>
+    <button class="lobby-enter-btn" onclick="enterDashboard()">ENTER SYSTEM ▶</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     SHARED NAV (shown on all app pages)
+════════════════════════════════════════════ -->
+<nav class="app-nav" id="app-nav" style="display:none">
+  <div class="nav-logo" onclick="goPage('dashboard')" style="cursor:pointer">
+    <div class="nav-orb">S</div>
+    <div class="nav-word">SATYON</div>
+  </div>
+  <div class="nav-links">
+    <div class="nav-link on" id="nl-dashboard" onclick="goPage('dashboard')">DASHBOARD</div>
+    <div class="nav-link" id="nl-profile" onclick="goPage('profile')">PROFILE</div>
+    <div class="nav-link" id="nl-leaderboard" onclick="goPage('leaderboard')">LEADERBOARD</div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-xp" id="nav-xp">XP 7,400</div>
+    <div class="nav-avatar" id="nav-av" onclick="goPage('profile')"></div>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════
+     PAGE: DASHBOARD  (simple quest + cert summary)
+════════════════════════════════════════════ -->
+<div class="page" id="page-dashboard">
+  <div class="section-pad" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:0">
+    <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:18px">
+      <div style="font-size:11px;color:var(--txt3);letter-spacing:1px;margin-bottom:6px">LEVEL</div>
+      <div style="font-family:var(--font-head);font-size:28px;font-weight:700;color:var(--p2)" id="db-level">12</div>
+      <div style="font-size:11px;color:var(--txt3)" id="db-rank">Developer</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:18px">
+      <div style="font-size:11px;color:var(--txt3);letter-spacing:1px;margin-bottom:6px">TOTAL XP</div>
+      <div style="font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--gold)" id="db-xp">7,400</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:18px">
+      <div style="font-size:11px;color:var(--txt3);letter-spacing:1px;margin-bottom:6px">STREAK</div>
+      <div style="font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--o)" id="db-streak">14 🔥</div>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:18px">
+      <div style="font-size:11px;color:var(--txt3);letter-spacing:1px;margin-bottom:6px">CERTIFICATES</div>
+      <div style="font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--gold)" id="db-certs">0</div>
+    </div>
+  </div>
+  <div class="section-pad">
+    <div style="font-family:var(--font-head);font-size:12px;letter-spacing:2px;color:var(--txt3);margin-bottom:16px">ACTIVE QUESTS</div>
+    <div id="db-quest-list"></div>
+    <div style="font-family:var(--font-head);font-size:12px;letter-spacing:2px;color:var(--txt3);margin:24px 0 16px">YOUR CERTIFICATES</div>
+    <div id="db-cert-list" style="display:flex;flex-wrap:wrap;gap:14px"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE: PROFILE
+════════════════════════════════════════════ -->
+<div class="page" id="page-profile">
+  <div class="profile-hero">
+    <div class="profile-avatar-wrap">
+      <div class="profile-avatar" id="prof-av-big"></div>
+      <div class="profile-edit-avatar" onclick="openAvatarPicker()">✏</div>
+    </div>
+    <div class="profile-hero-info">
+      <div class="profile-name"><span id="prof-display-name">Arjun</span><span class="profile-rank-tag" id="prof-rank-tag">DEVELOPER</span></div>
+      <div style="font-family:var(--font-mono);font-size:12px;color:var(--txt3);margin-bottom:6px" id="prof-username">@ArjunX_Dev</div>
+      <div class="profile-bio" id="prof-bio-display">Full-stack developer on the grind. Python → Flask → the world.</div>
+      <div class="profile-tags" id="prof-tags"></div>
+    </div>
+  </div>
+  <div class="profile-stats">
+    <div class="pstat"><div class="pstat-val" id="ps-xp">7,400</div><div class="pstat-key">TOTAL XP</div></div>
+    <div class="pstat"><div class="pstat-val" id="ps-level">12</div><div class="pstat-key">LEVEL</div></div>
+    <div class="pstat"><div class="pstat-val" id="ps-streak">14</div><div class="pstat-key">STREAK</div></div>
+    <div class="pstat"><div class="pstat-val" id="ps-certs">0</div><div class="pstat-key">CERTS</div></div>
+    <div class="pstat"><div class="pstat-val" id="ps-quests">2</div><div class="pstat-key">QUESTS DONE</div></div>
+  </div>
+  <div class="profile-body">
+    <!-- Edit info -->
+    <div class="prof-section">
+      <div class="prof-sec-title">EDIT PROFILE</div>
+      <div class="edit-field"><label class="edit-label">Display name</label><input class="edit-input" id="e-name" placeholder="Your name"></div>
+      <div class="edit-field"><label class="edit-label">Bio</label><textarea class="edit-textarea" id="e-bio" placeholder="Tell the world who you are…"></textarea></div>
+      <div class="edit-field"><label class="edit-label">Skills tags (comma-separated)</label><input class="edit-input" id="e-tags" placeholder="Python, Flask, React"></div>
+      <div class="edit-field"><label class="edit-label">GitHub URL</label><input class="edit-input" id="e-github" placeholder="https://github.com/you"></div>
+      <button class="save-btn" onclick="saveProfile()">SAVE CHANGES</button>
+    </div>
+    <!-- Achievements -->
+    <div class="prof-section">
+      <div class="prof-sec-title">ACHIEVEMENTS</div>
+      <div class="achievement-grid" id="achievement-grid"></div>
+    </div>
+    <!-- Ongoing quests -->
+    <div class="prof-section">
+      <div class="prof-sec-title">ONGOING QUESTS</div>
+      <div id="ongoing-quests"></div>
+    </div>
+    <!-- Certificates earned -->
+    <div class="prof-section">
+      <div class="prof-sec-title">CERTIFICATES</div>
+      <div id="prof-cert-list" style="display:flex;flex-wrap:wrap;gap:10px">
+        <div class="empty-state" style="padding:16px;font-size:12px">Complete quests & pass quizzes to earn certificates</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE: LEADERBOARD
+════════════════════════════════════════════ -->
+<div class="page" id="page-leaderboard">
+  <div class="lb-header">
+    <div>
+      <div class="lb-title">LEADERBOARD</div>
+      <div class="lb-sub">Compete with developers worldwide</div>
+    </div>
+  </div>
+  <div class="lb-filter">
+    <button class="lb-filter-btn on" onclick="setLbFilter('global',this)">Global</button>
+    <button class="lb-filter-btn" onclick="setLbFilter('quest',this)">By Quest</button>
+    <button class="lb-filter-btn" onclick="setLbFilter('certs',this)">Most Certs</button>
+    <button class="lb-filter-btn" onclick="setLbFilter('streak',this)">Longest Streak</button>
+  </div>
+  <div id="lb-quest-select" style="display:none" class="quest-lb-select"></div>
+  <div class="podium" id="lb-podium"></div>
+  <div style="height:24px;background:linear-gradient(180deg,transparent,var(--bg0));margin:0 32px -1px;position:relative;z-index:1"></div>
+  <div class="lb-table-wrap" id="lb-table"></div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     QUIZ MODAL
+════════════════════════════════════════════ -->
+<div class="quiz-overlay" id="quiz-overlay">
+  <div class="quiz-modal">
+    <button class="quiz-close" onclick="closeQuiz()">✕</button>
+    <div id="quiz-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ════════════════════════════════════════════
+     AVATAR PICKER MODAL  (reuses quiz overlay)
+════════════════════════════════════════════ -->
+
+<script>
+// ══════════════════════════════════════════════
+//  STAR FIELD
+// ══════════════════════════════════════════════
+(function(){
+  const c=document.getElementById('stars');
+  const ctx=c.getContext('2d');
+  function resize(){c.width=innerWidth;c.height=innerHeight}
+  resize();window.addEventListener('resize',resize);
+  const stars=Array.from({length:150},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.4+.2,a:Math.random(),d:Math.random()>.5?1:-1,sp:Math.random()*.008+.002}));
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    stars.forEach(s=>{
+      s.a+=s.sp*s.d;if(s.a>1||s.a<0)s.d*=-1;
+      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(200,195,255,${s.a})`;ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ══════════════════════════════════════════════
+//  DATA & STATE
+// ══════════════════════════════════════════════
+const AVATARS=['🧙','🦊','🐉','🤖','👾','🦁','🐺','🦅','⚔','🔮'];
+
+const RANKS=[{lv:1,t:'Initiate'},{lv:5,t:'Apprentice'},{lv:10,t:'Developer'},{lv:20,t:'Advanced Developer'},{lv:40,t:'System Architect'},{lv:75,t:'Code Master'},{lv:100,t:'Shadow Monarch'}];
+function getRank(lv){let r='Initiate';for(const x of RANKS){if(lv>=x.lv)r=x.t;}return r;}
+
+let APP={
+  loggedIn:false,
+  user:{username:'',displayName:'',email:'',avatar:'🧙',bio:'',tags:[],github:'',xp:7400,level:12,streak:14,questsDone:2},
+  certificates:[],
+  quests:[
+    {id:1,icon:'🧪',title:'Master Flask',xp:200,skillUnlock:'Flask',status:'active',difficulty:'Medium',
+     objectives:[{task:'Watch Flask tutorial',done:true},{task:'Build REST endpoint',done:true},{task:'Add JWT auth',done:false},{task:'Deploy to Render',done:false}]},
+    {id:2,icon:'⚡',title:'LeetCode Streak',xp:150,skillUnlock:null,status:'active',difficulty:'Hard',
+     objectives:[{task:'Solve #1',done:true},{task:'Solve #2',done:true},{task:'Solve #3',done:true},{task:'Solve #4',done:false},{task:'Solve #5',done:false}]},
+    {id:3,icon:'🤖',title:'ML Fundamentals',xp:300,skillUnlock:'ML / AI',status:'available',difficulty:'Hard',
+     objectives:[{task:'Watch ML tutorial',done:false},{task:'Explore Kaggle',done:false},{task:'Run sklearn model',done:false}]},
+  ],
+  leaderboard:[
+    {pos:1,name:'ShadowCoder_X',avatar:'🐉',rank:'Code Master',score:12840,certs:8,streak:42,questsCompleted:{'Master Flask':1,'LeetCode Streak':1,'ML Fundamentals':1}},
+    {pos:2,name:'NightWalker99',avatar:'🦅',rank:'Advanced Developer',score:10220,certs:5,streak:28,questsCompleted:{'Master Flask':1,'LeetCode Streak':1}},
+    {pos:3,name:'ByteHunter_Z', avatar:'🦁',rank:'Advanced Developer',score:9100, certs:4,streak:19,questsCompleted:{'Master Flask':1}},
+    {pos:4,name:'VoidScript',   avatar:'🔮',rank:'Developer',score:5800,certs:3,streak:14,questsCompleted:{'LeetCode Streak':1}},
+    {pos:5,name:'KernelPanic',  avatar:'⚔',rank:'Developer',score:4200,certs:2,streak:9,questsCompleted:{}},
+    {pos:6,name:'RustHunter',   avatar:'🤖',rank:'Developer',score:3900,certs:2,streak:7,questsCompleted:{}},
+  ],
+  lbFilter:'global',
+  lbQuestFilter:'Master Flask',
+};
+
+// ══════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════
+function authTab(mode,el){
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('form-login').style.display=mode==='login'?'':'none';
+  document.getElementById('form-signup').style.display=mode==='signup'?'':'none';
+}
+
+// Build avatar picker on page load
+(function(){
+  const row=document.getElementById('avatar-row');
+  row.innerHTML=AVATARS.map((a,i)=>`<div class="avatar-opt${i===0?' sel':''}" onclick="pickAvatar(this,'${a}')">${a}</div>`).join('');
+  APP.user.avatar=AVATARS[0];
+})();
+
+function pickAvatar(el,av){
+  document.querySelectorAll('.avatar-opt').forEach(x=>x.classList.remove('sel'));
+  el.classList.add('sel');
+  APP.user.avatar=av;
+}
+
+function doLogin(){
+  const em=document.getElementById('l-email').value.trim();
+  const pw=document.getElementById('l-pass').value;
+  const err=document.getElementById('l-err');
+  if(!em||!pw){err.textContent='Please fill in all fields.';return;}
+  err.textContent='';
+  // Demo: accept anything
+  APP.user.username=em.split('@')[0];
+  APP.user.displayName=APP.user.username;
+  APP.user.email=em;
+  APP.loggedIn=true;
+  enterLobby();
+}
+
+function doSignup(){
+  const u=document.getElementById('s-user').value.trim();
+  const n=document.getElementById('s-name').value.trim();
+  const em=document.getElementById('s-email').value.trim();
+  const p=document.getElementById('s-pass').value;
+  const p2=document.getElementById('s-pass2').value;
+  const err=document.getElementById('s-err');
+  if(!u||!n||!em||!p){err.textContent='All fields are required.';return;}
+  if(p!==p2){err.textContent='Passwords do not match.';return;}
+  if(p.length<6){err.textContent='Password must be at least 6 characters.';return;}
+  err.textContent='';
+  APP.user.username=u;APP.user.displayName=n;APP.user.email=em;
+  APP.loggedIn=true;
+  enterLobby();
+}
+
+// ══════════════════════════════════════════════
+//  LOBBY
+// ══════════════════════════════════════════════
+function enterLobby(){
+  showPage('lobby');
+  document.getElementById('lobby-name').textContent=APP.user.username.toUpperCase();
+  document.getElementById('lobby-rank').textContent=`⚔ ${getRank(APP.user.level).toUpperCase()} · LEVEL ${APP.user.level}`;
+  buildCertStage();
+  // Particle burst
+  setTimeout(()=>burstParticles(),400);
+}
+
+function buildCertStage(){
+  const stage=document.getElementById('cert-stage');
+  const certs=APP.certificates;
+  if(!certs.length){
+    stage.innerHTML=`<div style="font-size:13px;color:var(--txt3);font-style:italic;margin:20px 0">No certificates yet — complete quests and pass quizzes to earn them!</div>`;
+    return;
+  }
+  stage.innerHTML=certs.map((cert,i)=>`
+    <div class="cert-card" id="lc-${i}">
+      <div class="cert-shine"></div>
+      <div class="cert-badge-ring">${cert.icon}</div>
+      <div class="cert-name">${cert.skill.toUpperCase()}</div>
+      <div class="cert-skill">${cert.quest}</div>
+      <div class="cert-score">${cert.score}%</div>
+      <div class="cert-score-label">QUIZ SCORE</div>
+      <div class="cert-date">Earned ${cert.date}</div>
+    </div>
+  `).join('');
+  // Stagger reveal
+  certs.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`lc-${i}`);if(el)el.classList.add('revealed');},800+i*300));
+}
+
+function burstParticles(){
+  const lobby=document.getElementById('page-lobby');
+  const cx=innerWidth/2,cy=innerHeight/2;
+  const colors=['#7c5cfc','#22d3ee','#f5c842','#34d399','#a78bfa'];
+  for(let i=0;i<60;i++){
+    const p=document.createElement('div');p.className='burst-particle';
+    const angle=Math.random()*Math.PI*2;
+    const dist=80+Math.random()*300;
+    p.style.cssText=`left:${cx}px;top:${cy}px;background:${colors[i%colors.length]};--tx:${Math.cos(angle)*dist}px;--ty:${Math.sin(angle)*dist}px;--d:${.5+Math.random()*.8}s;--delay:${Math.random()*.4}s`;
+    lobby.appendChild(p);
+    setTimeout(()=>p.remove(),1400);
+  }
+}
+
+function enterDashboard(){
+  document.getElementById('app-nav').style.display='flex';
+  goPage('dashboard');
+}
+
+// ══════════════════════════════════════════════
+//  PAGE ROUTING
+// ══════════════════════════════════════════════
+const PAGES=['auth','lobby','dashboard','profile','leaderboard'];
+function showPage(name){
+  PAGES.forEach(p=>{
+    const el=document.getElementById(`page-${p}`);
+    if(el){el.classList.toggle('active',p===name);}
+  });
+  document.getElementById('app-nav').style.display=
+    ['dashboard','profile','leaderboard'].includes(name)?'flex':'none';
+}
+
+function goPage(name){
+  showPage(name);
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('on'));
+  const nl=document.getElementById(`nl-${name}`);
+  if(nl)nl.classList.add('on');
+  if(name==='profile')     renderProfile();
+  if(name==='leaderboard') renderLeaderboard();
+  if(name==='dashboard')   renderDashboard();
+}
+
+// ══════════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════════
+function renderDashboard(){
+  const u=APP.user;
+  document.getElementById('db-level').textContent=u.level;
+  document.getElementById('db-rank').textContent=getRank(u.level);
+  document.getElementById('db-xp').textContent=u.xp.toLocaleString();
+  document.getElementById('db-streak').textContent=u.streak+' 🔥';
+  document.getElementById('db-certs').textContent=APP.certificates.length;
+  document.getElementById('nav-xp').textContent='XP '+u.xp.toLocaleString();
+  document.getElementById('nav-av').textContent=u.avatar;
+
+  // Active quest cards
+  const active=APP.quests.filter(q=>q.status==='active');
+  document.getElementById('db-quest-list').innerHTML=active.map(q=>{
+    const done=q.objectives.filter(o=>o.done).length;
+    const pct=Math.round(done/q.objectives.length*100);
+    return `<div style="display:flex;align-items:center;gap:14px;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px;margin-bottom:8px;cursor:pointer" onclick="openQuiz(${q.id})">
+      <div style="font-size:28px">${q.icon}</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px">${q.title}</div>
+        <div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--p),var(--c));border-radius:3px"></div>
+        </div>
+      </div>
+      <div style="font-family:var(--font-mono);font-size:12px;color:var(--p2)">${done}/${q.objectives.length}</div>
+      <div style="font-size:11px;color:var(--gold);font-family:var(--font-mono)">+${q.xp}</div>
+      <div style="padding:5px 10px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);border-radius:6px;font-size:10px;color:var(--c);letter-spacing:1px;cursor:pointer">QUIZ</div>
+    </div>`;
+  }).join('')||'<div class="empty-state">No active quests. Start one!</div>';
+
+  // Cert list
+  document.getElementById('db-cert-list').innerHTML=APP.certificates.map(cert=>`
+    <div style="background:linear-gradient(135deg,rgba(26,26,53,.9),rgba(13,13,24,.9));border:1px solid var(--gold);border-radius:12px;padding:16px;width:160px;text-align:center;cursor:pointer" onclick="showToast('${cert.skill} Certificate — Score: ${cert.score}%','gold')">
+      <div style="font-size:32px;margin-bottom:8px">${cert.icon}</div>
+      <div style="font-family:var(--font-head);font-size:10px;color:var(--gold2);letter-spacing:1.5px;margin-bottom:4px">${cert.skill}</div>
+      <div style="font-family:var(--font-mono);font-size:18px;color:var(--gold)">${cert.score}%</div>
+      <div style="font-size:9px;color:var(--txt3);margin-top:4px">${cert.date}</div>
+    </div>
+  `).join('')||'<div style="font-size:12px;color:var(--txt3)">Complete quests + pass quizzes to earn certificates</div>';
+}
+
+// ══════════════════════════════════════════════
+//  PROFILE
+// ══════════════════════════════════════════════
+function renderProfile(){
+  const u=APP.user;
+  document.getElementById('prof-av-big').textContent=u.avatar;
+  document.getElementById('prof-display-name').textContent=u.displayName||u.username;
+  document.getElementById('prof-rank-tag').textContent=getRank(u.level).toUpperCase();
+  document.getElementById('prof-username').textContent='@'+u.username;
+  document.getElementById('prof-bio-display').textContent=u.bio||'No bio yet.';
+  document.getElementById('prof-tags').innerHTML=(u.tags||[]).map(t=>`<span class="ptag">${t}</span>`).join('');
+  document.getElementById('ps-xp').textContent=u.xp.toLocaleString();
+  document.getElementById('ps-level').textContent=u.level;
+  document.getElementById('ps-streak').textContent=u.streak;
+  document.getElementById('ps-certs').textContent=APP.certificates.length;
+  document.getElementById('ps-quests').textContent=u.questsDone;
+  // Pre-fill edit fields
+  document.getElementById('e-name').value=u.displayName||'';
+  document.getElementById('e-bio').value=u.bio||'';
+  document.getElementById('e-tags').value=(u.tags||[]).join(', ');
+  document.getElementById('e-github').value=u.github||'';
+  renderAchievements();
+  renderOngoingQuests();
+  renderProfileCerts();
+}
+
+function saveProfile(){
+  const u=APP.user;
+  u.displayName=document.getElementById('e-name').value.trim()||u.username;
+  u.bio=document.getElementById('e-bio').value.trim();
+  u.tags=document.getElementById('e-tags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  u.github=document.getElementById('e-github').value.trim();
+  renderProfile();
+  showToast('Profile saved!','g');
+}
+
+function openAvatarPicker(){
+  // Simple inline toggle of avatar row in profile
+  const u=APP.user;
+  const modal=document.createElement('div');
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px)';
+  modal.innerHTML=`<div style="background:var(--bg2);border:1px solid var(--bdr2);border-radius:16px;padding:28px;text-align:center">
+    <div style="font-family:var(--font-head);font-size:12px;letter-spacing:2px;color:var(--p3);margin-bottom:20px">CHOOSE AVATAR</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:20px">
+      ${AVATARS.map(a=>`<div onclick="APP.user.avatar='${a}';document.getElementById('prof-av-big').textContent='${a}';document.getElementById('nav-av').textContent='${a}';this.closest('.modal-p').remove();showToast('Avatar updated!','p')" class="modal-p" style="width:52px;height:52px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;border:2px solid ${a===u.avatar?'var(--p)':'transparent'};transition:border-color .15s" onmouseover="this.style.borderColor='var(--p2)'" onmouseout="this.style.borderColor='${a===u.avatar?'var(--p)':'transparent'}'"> ${a}</div>`).join('')}
+    </div>
+    <button onclick="this.closest('[style*=fixed]').remove()" style="padding:8px 20px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;color:var(--txt2);cursor:pointer;font-size:12px">Cancel</button>
+  </div>`;
+  // Clicking avatar in picker closes parent
+  modal.querySelectorAll('[onclick]').forEach(el=>{const orig=el.getAttribute('onclick');el.setAttribute('onclick',orig+';this.closest("[style*=fixed]").remove()')});
+  document.body.appendChild(modal);
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove()});
+}
+
+const ACHIEVEMENTS=[
+  {icon:'🔥',label:'7-Day Streak',cond:u=>u.streak>=7},
+  {icon:'⚡',label:'First Quest',cond:u=>u.questsDone>=1},
+  {icon:'🏆',label:'First Cert',cond:()=>APP.certificates.length>=1},
+  {icon:'🚀',label:'Level 10',cond:u=>u.level>=10},
+  {icon:'💎',label:'3 Certs',cond:()=>APP.certificates.length>=3},
+  {icon:'🌟',label:'30-Day Streak',cond:u=>u.streak>=30},
+  {icon:'👑',label:'Level 40',cond:u=>u.level>=40},
+  {icon:'🦁','label':'5 Quests',cond:u=>u.questsDone>=5},
+];
+function renderAchievements(){
+  document.getElementById('achievement-grid').innerHTML=ACHIEVEMENTS.map(a=>{
+    const unlocked=a.cond(APP.user);
+    return `<div class="ach-badge" title="${a.label}">
+      <div class="ach-icon${unlocked?'':' locked'}">${a.icon}</div>
+      <div class="ach-label">${a.label}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderOngoingQuests(){
+  const active=APP.quests.filter(q=>q.status==='active');
+  document.getElementById('ongoing-quests').innerHTML=active.map(q=>{
+    const done=q.objectives.filter(o=>o.done).length;
+    const pct=Math.round(done/q.objectives.length*100);
+    return `<div class="ongoing-quest">
+      <div class="oq-icon">${q.icon}</div>
+      <div class="oq-info">
+        <div class="oq-title">${q.title}</div>
+        <div class="oq-bar"><div class="oq-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="oq-pct">${pct}%</div>
+    </div>`;
+  }).join('')||'<div style="font-size:12px;color:var(--txt3)">No active quests</div>';
+}
+
+function renderProfileCerts(){
+  const el=document.getElementById('prof-cert-list');
+  if(!APP.certificates.length){el.innerHTML='<div style="font-size:12px;color:var(--txt3)">Complete quests + pass quizzes to earn certificates</div>';return;}
+  el.innerHTML=APP.certificates.map(c=>`
+    <div style="background:linear-gradient(135deg,rgba(26,26,53,.9),rgba(13,13,24,.9));border:1px solid var(--gold);border-radius:10px;padding:14px;text-align:center;width:120px;cursor:pointer">
+      <div style="font-size:28px;margin-bottom:6px">${c.icon}</div>
+      <div style="font-family:var(--font-head);font-size:9px;color:var(--gold2);letter-spacing:1px;margin-bottom:4px">${c.skill}</div>
+      <div style="font-family:var(--font-mono);font-size:16px;color:var(--gold)">${c.score}%</div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════
+//  LEADERBOARD
+// ══════════════════════════════════════════════
+function setLbFilter(f,el){
+  APP.lbFilter=f;
+  document.querySelectorAll('.lb-filter-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('lb-quest-select').style.display=f==='quest'?'flex':'none';
+  renderLeaderboard();
+}
+
+function setQuestFilter(q,el){
+  APP.lbQuestFilter=q;
+  document.querySelectorAll('.qlb-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  renderLeaderboard();
+}
+
+function renderLeaderboard(){
+  // Build quest filter buttons
+  const questNames=[...new Set(APP.quests.map(q=>q.title))];
+  const qs=document.getElementById('lb-quest-select');
+  qs.innerHTML=questNames.map(q=>`<button class="qlb-btn${APP.lbQuestFilter===q?' on':''}" onclick="setQuestFilter('${q}',this)">${APP.quests.find(x=>x.title===q)?.icon||'⚔'} ${q}</button>`).join('');
+
+  let list=[...APP.leaderboard];
+  // Add current user
+  const userEntry={pos:0,name:APP.user.username||'You',avatar:APP.user.avatar,rank:getRank(APP.user.level),score:APP.user.xp+(APP.user.questsDone*200)+(APP.user.streak*50),certs:APP.certificates.length,streak:APP.user.streak,questsCompleted:{},isYou:true};
+  list.push(userEntry);
+
+  if(APP.lbFilter==='certs')    list.sort((a,b)=>b.certs-a.certs);
+  else if(APP.lbFilter==='streak') list.sort((a,b)=>b.streak-a.streak);
+  else if(APP.lbFilter==='quest'){
+    list=list.filter(u=>u.questsCompleted?.[APP.lbQuestFilter]||u.isYou);
+    list.sort((a,b)=>b.score-a.score);
+  } else list.sort((a,b)=>b.score-a.score);
+
+  list=list.map((u,i)=>({...u,pos:i+1}));
+
+  // Podium (top 3)
+  const top3=list.slice(0,3);
+  const podiumOrder=top3.length>=2?[top3[1],top3[0],top3[2]].filter(Boolean):[top3[0]].filter(Boolean);
+  document.getElementById('lb-podium').innerHTML=podiumOrder.map((u,i)=>{
+    const isFirst=u.pos===1;
+    const baseClass=podiumOrder.indexOf(u)===1?'podium-slot':'podium-slot';
+    const posMap={0:2,1:1,2:3};const visualPos=posMap[i];
+    return `<div class="podium-slot" style="order:${i}">
+      <div class="podium-avatar" style="background:${u.isYou?'linear-gradient(135deg,var(--p),var(--c))':'var(--bg3)'}">
+        ${isFirst?'<div class="podium-crown">👑</div>':''}
+        ${u.avatar}
+      </div>
+      <div class="podium-name">${u.name}${u.isYou?'<br><span style="font-size:9px;color:var(--p2)">YOU</span>':''}</div>
+      <div class="podium-score">${APP.lbFilter==='certs'?u.certs+' certs':APP.lbFilter==='streak'?u.streak+' days':(u.score||0).toLocaleString()+' PWR'}</div>
+      <div class="podium-base"><div class="podium-rank-num">${u.pos}</div></div>
+    </div>`;
+  }).join('');
+
+  // Full table
+  const posClass=p=>p===1?'g':p===2?'s':p===3?'b':'';
+  document.getElementById('lb-table').innerHTML=list.map(u=>`
+    <div class="lb-row${u.isYou?' you':''}">
+      <div class="lb-pos ${posClass(u.pos)}">${u.pos<=3?['🥇','🥈','🥉'][u.pos-1]:u.pos}</div>
+      <div class="lb-av" style="${u.isYou?'background:linear-gradient(135deg,var(--p),var(--c))':''}">${u.avatar}</div>
+      <div class="lb-name">${u.name}${u.isYou?'<span class="lb-you-tag">YOU</span>':''}</div>
+      <div class="lb-rank-title">${u.rank}</div>
+      <div class="lb-certs">🏆 ${u.certs}</div>
+      <div class="lb-score">${APP.lbFilter==='certs'?u.certs+' certs':APP.lbFilter==='streak'?u.streak+'d':(u.score||0).toLocaleString()}</div>
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════════════
+//  QUIZ SYSTEM
+// ══════════════════════════════════════════════
+const QUIZZES={
+  1:{ // Master Flask
+    questions:[
+      {q:'What decorator is used to define a route in Flask?',opts:['@app.route','@flask.url','@route.map','@view.path'],ans:0},
+      {q:'Which HTTP method is typically used to create a new resource?',opts:['GET','DELETE','POST','PUT'],ans:2},
+      {q:'How do you access JSON data in a Flask POST request?',opts:['request.data','request.get_json()','request.body','flask.json()'],ans:1},
+      {q:'What does Flask\'s `url_for()` function do?',opts:['Redirects the user','Generates a URL for a given endpoint','Returns the current URL','Validates a URL'],ans:1},
+      {q:'Which command runs a Flask app in development mode?',opts:['FLASK_ENV=production flask run','flask start --dev','FLASK_DEBUG=1 flask run','python manage.py runserver'],ans:2},
+    ]
+  },
+  2:{ // LeetCode Streak
+    questions:[
+      {q:'What is the time complexity of binary search?',opts:['O(n)','O(log n)','O(n²)','O(1)'],ans:1},
+      {q:'Which data structure uses LIFO (Last In, First Out)?',opts:['Queue','Stack','Heap','Linked List'],ans:1},
+      {q:'What does Big O notation describe?',opts:['Memory usage only','Worst-case time complexity','Best-case performance','Code readability'],ans:1},
+      {q:'Which sorting algorithm has O(n log n) average complexity?',opts:['Bubble Sort','Selection Sort','Merge Sort','Insertion Sort'],ans:2},
+      {q:'In Python, what is the time complexity of list.append()?',opts:['O(n)','O(log n)','O(n²)','O(1) amortised'],ans:3},
+    ]
+  },
+  3:{ // ML Fundamentals
+    questions:[
+      {q:'What does "overfitting" mean in machine learning?',opts:['Model is too simple','Model performs well on training but poorly on test data','Model has too few parameters','Training takes too long'],ans:1},
+      {q:'Which algorithm is used for classification and regression?',opts:['K-Means','PCA','Random Forest','DBSCAN'],ans:2},
+      {q:'What is the purpose of a train/test split?',opts:['Speed up training','Evaluate model on unseen data','Reduce model size','Increase accuracy'],ans:1},
+      {q:'What does gradient descent minimise?',opts:['Accuracy','The loss function','Model size','Training time'],ans:1},
+      {q:'Which Python library is most commonly used for ML?',opts:['NumPy','Pandas','scikit-learn','Matplotlib'],ans:2},
+    ]
+  },
+};
+
+let quizState={questId:null,qIdx:0,score:0,answers:[],answered:false};
+
+function openQuiz(questId){
+  const q=APP.quests.find(x=>x.id===questId);
+  if(!q)return;
+  quizState={questId,qIdx:0,score:0,answers:[],answered:false};
+  document.getElementById('quiz-overlay').classList.add('open');
+  renderQuizQuestion();
+}
+
+function closeQuiz(){
+  document.getElementById('quiz-overlay').classList.remove('open');
+}
+
+function renderQuizQuestion(){
+  const quiz=QUIZZES[quizState.questId];
+  const quest=APP.quests.find(q=>q.id===quizState.questId);
+  if(!quiz){
+    document.getElementById('quiz-body').innerHTML=`<div style="text-align:center;padding:40px">
+      <div style="font-size:48px;margin-bottom:16px">${quest.icon}</div>
+      <div style="font-family:var(--font-head);font-size:14px;color:var(--p3);letter-spacing:2px;margin-bottom:8px">QUIZ COMING SOON</div>
+      <div style="font-size:13px;color:var(--txt2)">Questions for ${quest.title} are being crafted.</div>
+      <button onclick="closeQuiz()" style="margin-top:24px;padding:10px 24px;background:var(--p);border:none;border-radius:8px;color:#fff;font-family:var(--font-head);font-size:10px;letter-spacing:1.5px;cursor:pointer">CLOSE</button>
+    </div>`;
+    return;
+  }
+  const total=quiz.questions.length;
+  const qi=quizState.qIdx;
+  if(qi>=total){renderQuizResult();return;}
+  const qdata=quiz.questions[qi];
+  const letters=['A','B','C','D'];
+  const pct=Math.round(qi/total*100);
+  document.getElementById('quiz-body').innerHTML=`
+    <div class="quiz-stage-header">
+      <div class="quiz-icon">${quest.icon}</div>
+      <div class="quiz-title-block">
+        <div class="quiz-title">${quest.title}</div>
+        <div class="quiz-subtitle">Earn your certificate · ${total} questions</div>
+      </div>
+    </div>
+    <div class="quiz-progress-track"><div class="quiz-progress-fill" style="width:${pct}%"></div></div>
+    <div class="quiz-q-num">QUESTION ${qi+1} OF ${total}</div>
+    <div class="quiz-question">${qdata.q}</div>
+    <div class="quiz-options">
+      ${qdata.opts.map((opt,i)=>`
+        <button class="quiz-opt" onclick="answerQuiz(${i})">
+          <div class="quiz-opt-letter">${letters[i]}</div>
+          ${opt}
+        </button>
+      `).join('')}
+    </div>
+    <button class="quiz-next-btn" id="quiz-next" onclick="nextQuestion()">NEXT QUESTION →</button>
+  `;
+}
+
+function answerQuiz(idx){
+  if(quizState.answered)return;
+  quizState.answered=true;
+  const quiz=QUIZZES[quizState.questId];
+  const qdata=quiz.questions[quizState.qIdx];
+  const correct=idx===qdata.ans;
+  if(correct)quizState.score++;
+  quizState.answers.push({chosen:idx,correct});
+  // Highlight
+  document.querySelectorAll('.quiz-opt').forEach((el,i)=>{
+    el.style.pointerEvents='none';
+    if(i===qdata.ans)el.classList.add('correct');
+    if(i===idx&&!correct)el.classList.add('wrong');
+  });
+  const nextBtn=document.getElementById('quiz-next');
+  if(nextBtn){
+    nextBtn.classList.add('show');
+    const isLast=quizState.qIdx>=quiz.questions.length-1;
+    nextBtn.textContent=isLast?'SEE RESULTS →':'NEXT QUESTION →';
+  }
+}
+
+function nextQuestion(){
+  quizState.qIdx++;
+  quizState.answered=false;
+  renderQuizQuestion();
+}
+
+function renderQuizResult(){
+  const quiz=QUIZZES[quizState.questId];
+  const quest=APP.quests.find(q=>q.id===quizState.questId);
+  const pct=Math.round(quizState.score/quiz.questions.length*100);
+  const passed=pct>=60;
+
+  document.getElementById('quiz-body').innerHTML=`
+    <div class="quiz-result">
+      <div class="result-score-ring">
+        <div class="result-score-num">${pct}%</div>
+        <div class="result-score-label">SCORE</div>
+      </div>
+      <div class="result-title">${passed?'QUEST MASTERED!':'KEEP TRAINING'}</div>
+      <div class="result-sub">${quizState.score} / ${quiz.questions.length} correct · ${passed?'Certificate unlocked! 🏆':'Minimum 60% required to earn certificate.'}</div>
+      ${passed?`
+        <div class="result-cert-preview" onclick="claimCertificate(${quizState.questId},${pct})">
+          <div style="font-size:40px">${quest.icon}</div>
+          <div>
+            <div style="font-family:var(--font-head);font-size:12px;color:var(--gold2);letter-spacing:1.5px;margin-bottom:4px">${quest.skillUnlock||quest.title} CERTIFICATE</div>
+            <div style="font-size:12px;color:var(--txt2)">Score: ${pct}% · Click to claim</div>
+          </div>
+          <div style="margin-left:auto;font-size:28px">🏆</div>
+        </div>
+        <button class="cert-claim-btn" onclick="claimCertificate(${quizState.questId},${pct})">CLAIM CERTIFICATE</button>
+      `:`<button onclick="openQuiz(${quizState.questId})" style="width:100%;padding:12px;background:var(--p);border:none;border-radius:10px;font-family:var(--font-head);font-size:11px;font-weight:700;letter-spacing:2px;color:#fff;cursor:pointer;margin-bottom:8px">TRY AGAIN</button>`}
+      <button onclick="closeQuiz()" style="width:100%;padding:10px;background:transparent;border:1px solid var(--bdr);border-radius:10px;font-size:12px;color:var(--txt3);cursor:pointer;margin-top:4px">CLOSE</button>
+    </div>
+  `;
+}
+
+function claimCertificate(questId,score){
+  const quest=APP.quests.find(q=>q.id===questId);
+  if(!quest)return;
+  // Don't duplicate
+  if(APP.certificates.find(c=>c.quest===quest.title)){showToast('Already earned!','gold');return;}
+  const cert={icon:quest.icon,skill:quest.skillUnlock||quest.title,quest:quest.title,score,date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})};
+  APP.certificates.push(cert);
+  quest.status='completed';
+  APP.user.questsDone++;
+  APP.user.xp+=quest.xp;
+  // Add user to leaderboard with cert
+  const ue=APP.leaderboard.find(u=>u.name===APP.user.username);
+  if(ue){ue.certs++;ue.score=APP.user.xp+(APP.user.questsDone*200)+(APP.user.streak*50);}
+  closeQuiz();
+  // Show lobby certificate reveal
+  showCertLobbyReveal(cert);
+}
+
+// ══════════════════════════════════════════════
+//  CERTIFICATE LOBBY REVEAL
+// ══════════════════════════════════════════════
+function showCertLobbyReveal(cert){
+  // Build full-screen cinematic reveal
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.95);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0;overflow:hidden;opacity:0;transition:opacity .4s';
+  document.body.appendChild(overlay);
+  requestAnimationFrame(()=>overlay.style.opacity='1');
+
+  // Rings
+  for(let i=0;i<5;i++){
+    const r=document.createElement('div');
+    r.style.cssText=`position:absolute;border-radius:50%;border:1px solid rgba(245,200,66,${.15-i*.02});animation:ring-expand ${2+i*.4}s ease-out infinite ${i*.3}s;width:${200+i*150}px;height:${200+i*150}px;top:50%;left:50%;transform:translate(-50%,-50%)`;
+    overlay.appendChild(r);
+  }
+
+  overlay.innerHTML+=`
+    <div style="position:relative;z-index:2;text-align:center;animation:fade-up .8s .3s ease both">
+      <div style="font-family:var(--font-head);font-size:11px;letter-spacing:5px;color:var(--gold);margin-bottom:20px;animation:fade-up .6s .2s ease both">✦ ACHIEVEMENT UNLOCKED ✦</div>
+      <div style="width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#b8860b);display:flex;align-items:center;justify-content:center;font-size:56px;margin:0 auto 24px;box-shadow:0 0 60px rgba(245,200,66,.6);animation:badge-glow 1.5s ease-in-out infinite,fade-up .7s .4s ease both">${cert.icon}</div>
+      <div style="font-family:var(--font-head);font-size:clamp(18px,5vw,36px);font-weight:900;color:#fff;letter-spacing:3px;margin-bottom:8px;animation:fade-up .6s .6s ease both">${(cert.skill).toUpperCase()}</div>
+      <div style="font-family:var(--font-head);font-size:12px;letter-spacing:3px;color:var(--gold2);margin-bottom:32px;animation:fade-up .6s .7s ease both">CERTIFICATE EARNED</div>
+      <div style="background:linear-gradient(135deg,rgba(26,26,53,.95),rgba(13,13,24,.97));border:2px solid var(--gold);border-radius:16px;padding:28px 36px;margin-bottom:32px;min-width:300px;animation:fade-up .7s .9s ease both;position:relative;overflow:hidden">
+        <div style="position:absolute;inset:0;background:linear-gradient(45deg,transparent 30%,rgba(255,255,255,.03) 50%,transparent 70%);animation:shine 2.5s ease-in-out infinite"></div>
+        <div style="font-size:11px;color:var(--txt3);letter-spacing:2px;margin-bottom:12px">CERTIFICATE OF COMPLETION</div>
+        <div style="font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--gold2);margin-bottom:4px">${APP.user.displayName||APP.user.username}</div>
+        <div style="font-size:12px;color:var(--txt2);margin-bottom:16px">has successfully completed</div>
+        <div style="font-family:var(--font-head);font-size:16px;color:#fff;margin-bottom:16px">${cert.quest}</div>
+        <div style="display:flex;justify-content:center;gap:28px">
+          <div style="text-align:center"><div style="font-family:var(--font-mono);font-size:20px;color:var(--gold)">${cert.score}%</div><div style="font-size:10px;color:var(--txt3);letter-spacing:1px">QUIZ SCORE</div></div>
+          <div style="width:1px;background:rgba(245,200,66,.2)"></div>
+          <div style="text-align:center"><div style="font-family:var(--font-mono);font-size:20px;color:var(--gold)">${cert.date}</div><div style="font-size:10px;color:var(--txt3);letter-spacing:1px">DATE EARNED</div></div>
+        </div>
+      </div>
+      <button onclick="this.closest('[style*=fixed]').remove();showToast('Certificate saved to your profile!','gold')" style="padding:14px 48px;background:linear-gradient(135deg,var(--gold),#b8860b);border:none;border-radius:12px;font-family:var(--font-head);font-size:12px;font-weight:700;letter-spacing:3px;color:#111;cursor:pointer;box-shadow:0 0 24px rgba(245,200,66,.35);transition:transform .2s;animation:fade-up .6s 1.2s ease both" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">COLLECT REWARD</button>
+    </div>
+  `;
+
+  // Burst particles
+  setTimeout(()=>{
+    for(let i=0;i<80;i++){
+      const p=document.createElement('div');p.className='burst-particle';
+      const angle=Math.random()*Math.PI*2;const dist=100+Math.random()*400;
+      p.style.cssText=`position:absolute;left:50%;top:50%;width:${2+Math.random()*4}px;height:${2+Math.random()*4}px;border-radius:50%;background:${['#f5c842','#fde68a','#7c5cfc','#22d3ee','#34d399'][Math.floor(Math.random()*5)]};--tx:${Math.cos(angle)*dist}px;--ty:${Math.sin(angle)*dist}px;--d:${.6+Math.random()*1}s;--delay:${Math.random()*.5}s;z-index:3`;
+      overlay.appendChild(p);
+      setTimeout(()=>p.remove(),1800);
+    }
+  },400);
+}
+
+// ══════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════
+function showToast(msg,cls='p'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=`toast ${cls} show`;
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ══════════════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════════════
+// Page starts on auth
+showPage('auth');
+</script>
+</body>
+</html>
